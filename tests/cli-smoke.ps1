@@ -4,7 +4,7 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path $PSScriptRoot
 if (-not $CliPath) { $CliPath = Join-Path $repoRoot 'bin/Release/net10.0/viking.dll' }
 $CliPath = (Resolve-Path -LiteralPath $CliPath).Path
-$dotnet = (Get-Command dotnet -CommandType Application).Source
+$dotnet = (Get-Command dotnet -CommandType Application | Select-Object -First 1).Source
 $tempRoot = Join-Path ([IO.Path]::GetTempPath()) ('viking-cli-tests-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $tempRoot | Out-Null
 $fixture = Join-Path $tempRoot 'fictional card.viking.json'
