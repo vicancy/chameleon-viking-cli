@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore
+        run: dotnet restore tests/VikingTool.Tests.csproj
+      - name: Build
+        run: dotnet build tests/VikingTool.Tests.csproj -c Release --no-restore --warnaserror
+      - name: Device protocol tests (simulated)
+        run: dotnet run --project tests/VikingTool.Tests.csproj -c Release --no-build
+      - name: CLI tests (no hardware)
+        shell: pwsh
+        run: ./tests/cli-smoke.ps1
+      - name: Publish Windows CLI
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./build.ps1

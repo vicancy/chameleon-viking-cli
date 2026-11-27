@@ -1,0 +1,65 @@
+Viking CLI — .NET 10 / USB / Chameleon Ultra
+
+在本目录打开 PowerShell，运行下面的命令。
+先从源码构建（见下方命令）。生成的 Windows x64 单文件程序需要 .NET 10 运行时。
+连接 USB 数据线。Windows 未指定 --port 时自动选择唯一的 Chameleon Ultra。
+
+查看设备：
+  .\viking.exe ports
+  .\viking.exe info
+
+读取源卡，保存结果：
+  .\viking.exe read --out my-card.viking.json
+
+下面的写入和核对命令使用刚保存的 my-card.viking.json。
+read 不指定 --out 时，在两次读取一致后更新程序旁的 last-read.viking.json。
+使用 dotnet run 时，默认文件位于编译输出目录；建议显式指定 --out。
+未读到卡或结果不稳定时，不会覆盖已保存文件。
+
+移开源卡，放好一张确认可以覆盖的 T5577 空白卡，再写入：
+  .\viking.exe write --from my-card.viking.json --blank-t5577
+
+单独核对新卡（只读）：
+  .\viking.exe verify --from my-card.viking.json
+
+其他选项：
+  --port COM3     指定 USB 串口
+  --json          输出一条 JSON 结果到 stdout；进度输出到 stderr
+  --id 12345678   write / verify 可用已知的 8 位十六进制编号代替 --from
+  .\viking.exe help
+
+退出码：0 成功；1 设备、读写或文件错误；2 参数或端口选择错误。
+
+写卡说明
+仅支持 Viking 125 kHz；T5577/T55xx 是低频可写卡，普通 M1/UID/CUID IC 卡不适用。
+--blank-t5577 表示确认已换上目标空白卡并允许覆盖，每次只放一张卡。
+如果检测到目标已含 Viking 数据，会停止写入。可先用 verify 核对。
+写入命令返回后会独立回读两次，编号一致才返回成功。
+失败后目标卡可能已被修改，请先 verify，不要直接重复写入。
+最终请到电梯读头实际试刷。读写验证不能替代现场测试。
+
+固件的 Viking 写入接口会设置 T5577 可改写密码保护，默认密码为 20206666
+（十六进制），不设置不可逆锁定位。日后用其他工具改写时可能需要这个密码。
+本 CLI 面向空白卡，不提供覆盖已有 Viking 卡的入口。
+
+程序不联网。关闭占用同一设备的其他读卡程序后再运行。
+源码：Cli.cs、VikingCore.cs；项目：VikingTool.csproj，目标框架 net10.0。
+构建和运行需要 .NET 10 SDK：
+  dotnet build -c Release
+  dotnet run --project VikingTool.csproj -- info
+  dotnet run --project tests/VikingTool.Tests.csproj -c Release
+  pwsh -File tests/cli-smoke.ps1
+
+重新发布 Windows x64 单文件并更新本目录 viking.exe：
+  .\build.ps1
+
+项目依赖通过 NuGet.Config 中微软的 dotnet-public 公共源恢复。
+卡号文件沿用旧版 JSON 格式。编译、发布目录和 *.viking.json 已列入 .gitignore。
+
+Linux/macOS 可从源码运行；请先执行 ports，再用 --port 指定实际设备路径：
+  dotnet run --project VikingTool.csproj -- ports
+  dotnet run --project VikingTool.csproj -- info --port /dev/ttyACM0
+Windows 的自动发现使用 WMI；其他平台不会调用 WMI。其他平台硬件读写尚未实测。
+
+协议参考：https://github.com/RfidResearchGroup/ChameleonUltra
+许可证：GPL-3.0-only，见 LICENSE；上游来源说明见 NOTICE。

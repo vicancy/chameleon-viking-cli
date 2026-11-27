@@ -1,0 +1,25 @@
+Chameleon Viking CLI
+Copyright (C) 2026 Liangying.Wei
+SPDX-License-Identifier: GPL-3.0-only
+
+This independent C# client follows the ChameleonUltra USB protocol and
+adapts the command framing, reader-mode workflow and Viking/T55xx payload
+behavior documented in the upstream client and firmware implementation.
+Viking decoding and physical tag programming are provided by the device
+firmware, not implemented anew by this client.
+
+Upstream: RfidResearchGroup/ChameleonUltra and its contributors
+License: GNU General Public License version 3
+https://github.com/RfidResearchGroup/ChameleonUltra
+
+Relevant upstream sources:
+  software/script/chameleon_com.py
+  software/script/chameleon_cmd.py
+  software/script/chameleon_enum.py
+  firmware/application/src/app_cmd.c
+  firmware/application/src/rfid/reader/lf/lf_reader_main.c
+  firmware/application/src/rfid/nfctag/lf/protocols/viking.c
+
+Microsoft .NET, System.IO.Ports and System.Management are dependencies
+distributed under their own licenses. See the .NET runtime repository:
+https://github.com/dotnet/runtime/blob/main/LICENSE.TXT

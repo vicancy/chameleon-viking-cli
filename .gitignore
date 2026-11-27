@@ -1,0 +1,8 @@
+**/bin/
+**/obj/
+artifacts/
+/viking.exe
+/viking
+/viking.exe.config
+*.viking.json
+*.log
